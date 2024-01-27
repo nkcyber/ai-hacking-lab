@@ -23,13 +23,14 @@ type ChatService struct {
 	log     *slog.Logger
 	Ctx     context.Context
 	chatTTL time.Duration // used when adding keys to redis
-	temp    float64       // passed to LLM  options
+	temp    float64       // passed to LLM options
+	maxLen  int           // max len in tokens - passed to LLM options
 }
 
 // initalizes ollama & redis
-func NewChat(model_name string, model_temp float64, log *slog.Logger) (ChatService, error) {
+func NewChat(modelName string, modelTemp float64, maxLen int, log *slog.Logger) (ChatService, error) {
 	llm, err := ollama.NewChat(ollama.WithLLMOptions(
-		ollama.WithModel(model_name), ollama.WithPredictPenalizeNewline(true)))
+		ollama.WithModel(modelName), ollama.WithPredictPenalizeNewline(true)))
 	if err != nil {
 		return ChatService{}, fmt.Errorf("initalizing chat: %w", err)
 	}
@@ -46,8 +47,9 @@ func NewChat(model_name string, model_temp float64, log *slog.Logger) (ChatServi
 		Llm:     llm,
 		rdb:     rdb,
 		chatTTL: 10 * time.Minute,
-		temp:    model_temp,
+		temp:    modelTemp,
 		log:     log,
+		maxLen:  maxLen,
 	}, nil
 }
 
@@ -59,6 +61,7 @@ func (c *ChatService) Respond(chatId ChatIdType, callback func(ctx context.Conte
 	completion, err := c.Llm.Call(c.Ctx, messageHistory,
 		llms.WithStreamingFunc(callback),
 		llms.WithTemperature(c.temp),
+		llms.WithMaxTokens(c.maxLen),
 	)
 	if err != nil {
 		return fmt.Errorf("llm response: %w", err)

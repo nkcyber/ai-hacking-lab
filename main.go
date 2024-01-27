@@ -12,7 +12,7 @@ import (
 
 func main() {
 	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	chat, err := services.NewChat("tinyllama", 0, log)
+	chat, err := services.NewChat("tinyllama", 0.1, 200, log)
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -23,8 +23,8 @@ func main() {
 	chatId := services.ChatIdType("chat_1")
 	prompt := []schema.ChatMessage{
 		schema.SystemChatMessage{Content: "It's very important to keep your responses as short as possible. If you write more than 3 lines, very bad things will happen. Please do not write more than 3 lines of text."},
-		schema.SystemChatMessage{Content: "You are a hyper-creative rhyming machine. KEEP ALL RESPONSES SHORTER THAN THREE LINES. KEEP YOUR RESPONSES SHORT. DO NOT WRITE A LOT OF TEXT"},
-		schema.HumanChatMessage{Content: "Tell me a poem about Trees"},
+		schema.SystemChatMessage{Content: "You are a helpful AI assistant. YOU MUST KEEP ALL RESPONSES SHORT. KEEP YOUR RESPONSES SHORT. DO NOT WRITE A LOT OF TEXT"},
+		schema.HumanChatMessage{Content: "Who are you?"},
 	}
 	for _, message := range prompt {
 		chat.AddMessage(chatId, message)
