@@ -72,7 +72,6 @@ func (c *ChatService) GetMessages(chatId ChatIdType) ([]schema.ChatMessage, erro
 
 // adds a message to the Redis instance
 func (c *ChatService) AddMessage(chatId ChatIdType, message schema.ChatMessage) error {
-	c.log.Info("adding message to " + string(chatId))
 	history, err := c.GetSerialzableMessages(chatId)
 	if err != nil {
 		return fmt.Errorf("adding message: %w", err)

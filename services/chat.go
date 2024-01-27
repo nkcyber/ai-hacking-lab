@@ -7,13 +7,11 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
 )
 
 type ChatService struct {
-	Ctx context.Context
-	Llm *ollama.Chat
-	log *slog.Logger
 	// There's community support for Redis chat history for TypeScript, but not Go.
 	// So, we have to roll our own, for the moment.
 	// TypeScript suppport:
@@ -21,12 +19,15 @@ type ChatService struct {
 	// We just store the array of messages in Redis according to the chatId.
 	// It's not a fancy solution, but this is not a fancy app.
 	rdb     *redis.Client
-	chatTTL time.Duration
-	temp    float64
+	Llm     *ollama.Chat
+	log     *slog.Logger
+	Ctx     context.Context
+	chatTTL time.Duration // used when adding keys to redis
+	temp    float64       // passed to LLM  options
 }
 
 // initalizes ollama & redis
-func NewChat(model_name string, log *slog.Logger) (ChatService, error) {
+func NewChat(model_name string, model_temp float64, log *slog.Logger) (ChatService, error) {
 	llm, err := ollama.NewChat(ollama.WithLLMOptions(
 		ollama.WithModel(model_name), ollama.WithPredictPenalizeNewline(true)))
 	if err != nil {
@@ -45,9 +46,28 @@ func NewChat(model_name string, log *slog.Logger) (ChatService, error) {
 		Llm:     llm,
 		rdb:     rdb,
 		chatTTL: 10 * time.Minute,
-		temp:    1,
+		temp:    model_temp,
 		log:     log,
 	}, nil
+}
+
+func (c *ChatService) Respond(chatId ChatIdType, callback func(ctx context.Context, chunk []byte) error) error {
+	messageHistory, err := c.GetMessages(chatId)
+	if err != nil {
+		return err
+	}
+	completion, err := c.Llm.Call(c.Ctx, messageHistory,
+		llms.WithStreamingFunc(callback),
+		llms.WithTemperature(c.temp),
+	)
+	if err != nil {
+		return fmt.Errorf("llm response: %w", err)
+	}
+	err = c.AddMessage(chatId, completion)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // TODO: load prompts
