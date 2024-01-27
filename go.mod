@@ -2,7 +2,10 @@ module github.com/nkcyber/ai-hacking-lab
 
 go 1.21.6
 
-require github.com/tmc/langchaingo v0.1.3
+require (
+	github.com/redis/go-redis/v9 v9.4.0
+	github.com/tmc/langchaingo v0.1.3
+)
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
@@ -25,7 +28,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.0.9 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.2 // indirect
-	github.com/redis/go-redis/v9 v9.4.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
