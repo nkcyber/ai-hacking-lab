@@ -32,12 +32,12 @@ func (sm SerializableMessage) GetType() schema.ChatMessageType {
 
 // wipes redis instance
 func (c *ChatService) ClearAllMessages() error {
-	return c.rdb.FlushDB(c.Ctx).Err()
+	return c.rdb.FlushDB(c.ctx).Err()
 }
 
 // returns nil if chatId exists. Otherwise, returns an error
 func (c *ChatService) AssertChatIdExists(chatId ChatIdType) error {
-	exists, err := c.rdb.Exists(c.Ctx, string(chatId)).Result()
+	exists, err := c.rdb.Exists(c.ctx, string(chatId)).Result()
 	if err != nil {
 		return fmt.Errorf("checking if '%s' exists: %w", chatId, err)
 	}
@@ -50,7 +50,7 @@ func (c *ChatService) AssertChatIdExists(chatId ChatIdType) error {
 // gets our serializable message format from the redis instance
 func (c *ChatService) GetSerialzableMessages(chatId ChatIdType) ([]SerializableMessage, error) {
 	// check if key exists
-	exists, err := c.rdb.Exists(c.Ctx, string(chatId)).Result()
+	exists, err := c.rdb.Exists(c.ctx, string(chatId)).Result()
 	if err != nil {
 		return nil, fmt.Errorf("checking if '%s' exists: %w", chatId, err)
 	}
@@ -59,7 +59,7 @@ func (c *ChatService) GetSerialzableMessages(chatId ChatIdType) ([]SerializableM
 		return []SerializableMessage{}, nil
 	}
 	// get the key, assuming it exists
-	redisHistory, err := c.rdb.Get(c.Ctx, string(chatId)).Result()
+	redisHistory, err := c.rdb.Get(c.ctx, string(chatId)).Result()
 	if err != nil {
 		return nil, fmt.Errorf("getting '%s' from redis: %w", chatId, err)
 	}
@@ -102,7 +102,7 @@ func (c *ChatService) AddMessage(chatId ChatIdType, message schema.ChatMessage) 
 	if err != nil {
 		return fmt.Errorf("marshalling history: %w", err)
 	}
-	err = c.rdb.Set(c.Ctx, string(chatId), historyStr, c.chatTTL).Err()
+	err = c.rdb.Set(c.ctx, string(chatId), historyStr, c.chatTTL).Err()
 	if err != nil {
 		return fmt.Errorf("setting key (%s) in redis: %w", chatId, err)
 	}

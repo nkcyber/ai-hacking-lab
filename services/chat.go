@@ -22,9 +22,9 @@ type ChatService struct {
 	// We just store the array of messages in Redis according to the chatId.
 	// It's not a fancy solution, but this is not a fancy app.
 	rdb     *redis.Client
-	Llm     *ollama.Chat
+	llm     *ollama.Chat
 	log     *slog.Logger
-	Ctx     context.Context
+	ctx     context.Context
 	chatTTL time.Duration // used when adding keys to redis
 	temp    float64       // passed to LLM options
 	maxLen  int           // max len in tokens - passed to LLM options
@@ -55,8 +55,8 @@ func NewChat(modelName string, modelTemp float64, maxLen int, promptPath string,
 	}
 	log.Info("creating chat sevice")
 	return ChatService{
-		Ctx:     ctx,
-		Llm:     llm,
+		ctx:     ctx,
+		llm:     llm,
 		rdb:     rdb,
 		chatTTL: 10 * time.Minute,
 		temp:    modelTemp,
@@ -71,7 +71,7 @@ func (c *ChatService) RespondCallback(chatId ChatIdType, callback func(ctx conte
 	if err != nil {
 		return err
 	}
-	completion, err := c.Llm.Call(c.Ctx, messageHistory,
+	completion, err := c.llm.Call(c.ctx, messageHistory,
 		llms.WithStreamingFunc(callback),
 		llms.WithTemperature(c.temp),
 		llms.WithMaxTokens(c.maxLen),
@@ -91,7 +91,7 @@ func (c *ChatService) Respond(chatId ChatIdType) (*schema.AIChatMessage, error) 
 	if err != nil {
 		return nil, err
 	}
-	completion, err := c.Llm.Call(c.Ctx, messageHistory,
+	completion, err := c.llm.Call(c.ctx, messageHistory,
 		llms.WithTemperature(c.temp),
 		llms.WithMaxTokens(c.maxLen),
 	)
