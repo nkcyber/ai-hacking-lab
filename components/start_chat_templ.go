@@ -156,7 +156,7 @@ func input(chatId string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#messages\" hx-include=\"#message-content\" hx-swap=\"afterend\" hx-ext=\"disable-element\" hx-disable-element=\"self\" class=\"text-white absolute bg-blue-600 bottom-2.5 end-2.5 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium hover:bg-blue-700 px-4 py-2 rounded-lg text-sm\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#messages\" hx-include=\"#message-content\" hx-swap=\"beforeend\" hx-ext=\"disable-element\" hx-disable-element=\"self\" class=\"text-white absolute bg-blue-600 bottom-2.5 end-2.5 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium hover:bg-blue-700 px-4 py-2 rounded-lg text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -23,6 +23,7 @@ func main() {
 	chat, err := services.NewChat("tinyllama", 0.1, 100, promptPath, logger)
 	if err != nil {
 		logger.Error(err.Error())
+		return
 	}
 	err = chat.ClearAllMessages()
 	if err != nil {
@@ -33,60 +34,62 @@ func main() {
 	router.Use(middleware.Timeout(120 * time.Second))
 	router.Use(httprate.LimitByIP(1, 1*time.Second))
 	router.Use(slogchi.New(logger))
-	router.Post("/chat/{chatId}", func(w http.ResponseWriter, r *http.Request) {
-		// ensure chat id exists
-		chatId := services.ChatIdType(chi.URLParam(r, "chatId"))
-		if len(chatId) == 0 {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		if err := chat.AssertChatIdExists(chatId); err != nil {
-			logger.Warn(fmt.Sprintf("could not find chatId '%s'", chatId))
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		// get question from body
-		err = r.ParseForm()
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		userInput := r.FormValue("message")
-		if len(userInput) < 5 || len(userInput) > 200 {
-			components.Response("", "Your message must be between 5 and 200 characters!").Render(r.Context(), w)
-			return
-		}
-		logger.Info("RESPONDING to " + string(chatId))
-		chat.AddMessage(chatId, schema.HumanChatMessage{Content: userInput})
-		response, err := chat.Respond(chatId)
-		if err != nil {
-			logger.Error(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		components.Response(userInput, response.GetContent()).Render(r.Context(), w)
-	})
-	router.Get("/{promptName}", func(w http.ResponseWriter, r *http.Request) {
-		promptName := chi.URLParam(r, "promptName")
-		if !chat.PromptExists(promptName) {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-		components.Index(promptName).Render(r.Context(), w)
-	})
-	router.Post("/start/{promptName}", func(w http.ResponseWriter, r *http.Request) {
-		promptName := chi.URLParam(r, "promptName")
-		if !chat.PromptExists(promptName) {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-		id, err := chat.StartChat(promptName)
-		if err != nil {
-			logger.Error(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		components.StartChat(string(id)).Render(r.Context(), w)
+	router.Route("/chat", func(r chi.Router) {
+		r.Post("/{chatId}", func(w http.ResponseWriter, r *http.Request) {
+			// ensure chat id exists
+			chatId := services.ChatIdType(chi.URLParam(r, "chatId"))
+			if len(chatId) == 0 {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			if err := chat.AssertChatIdExists(chatId); err != nil {
+				logger.Warn(fmt.Sprintf("could not find chatId '%s'", chatId))
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			// get question from body
+			err = r.ParseForm()
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			userInput := r.FormValue("message")
+			if len(userInput) < 5 || len(userInput) > 200 {
+				components.Response("", "Your message must be between 5 and 200 characters!").Render(r.Context(), w)
+				return
+			}
+			logger.Info("RESPONDING to " + string(chatId))
+			chat.AddMessage(chatId, schema.HumanChatMessage{Content: userInput})
+			response, err := chat.Respond(chatId)
+			if err != nil {
+				logger.Error(err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			components.Response(userInput, response.GetContent()).Render(r.Context(), w)
+		})
+		r.Get("/{promptName}", func(w http.ResponseWriter, r *http.Request) {
+			promptName := chi.URLParam(r, "promptName")
+			if !chat.PromptExists(promptName) {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			components.Index(promptName).Render(r.Context(), w)
+		})
+		r.Post("/start/{promptName}", func(w http.ResponseWriter, r *http.Request) {
+			promptName := chi.URLParam(r, "promptName")
+			if !chat.PromptExists(promptName) {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			id, err := chat.StartChat(promptName)
+			if err != nil {
+				logger.Error(err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			components.StartChat(string(id)).Render(r.Context(), w)
+		})
 	})
 	logger.Info("Listening and serving on http://localhost:3000")
 	http.ListenAndServe(":3000", router)

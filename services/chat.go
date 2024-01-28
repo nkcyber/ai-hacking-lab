@@ -50,6 +50,9 @@ func NewChat(modelName string, modelTemp float64, maxLen int, promptPath string,
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
+	if ping := rdb.Ping(ctx); ping.Err() != nil {
+		return ChatService{}, fmt.Errorf("connecting to redis: %w", ping.Err())
+	}
 	log.Info("creating chat sevice")
 	return ChatService{
 		Ctx:     ctx,
