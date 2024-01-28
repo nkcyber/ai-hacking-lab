@@ -33,4 +33,5 @@ Learn about AI Hacking!
 | [go-chi](https://github.com/go-chi/chi)           | Router                  |
 | [httprate](https://github.com/go-chi/httprate)    | Rate limiter            |
 | [Tailwind CSS](https://tailwindcss.com/)          | CSS Framework           |
+| [Hero Icons](https://github.com/tailwindlabs/heroicons)  | Icons            |
 
