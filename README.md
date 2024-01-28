@@ -39,6 +39,8 @@ This website is meant to serve as a framework for challenging students to manipu
 >         the 'temperature' of the LLM (default 0.1)
 >   -promptPath string
 >         the filepath to load prompts from (default "./example-prompts.json")
+>   -redisAddress string
+>         the address to connect to redis on (default "localhost:6379")
 > ```
 > For example,
 > ```bash
