@@ -1,6 +1,6 @@
 package components
 
-templ Index() {
+templ Index(promptName string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -13,7 +13,7 @@ templ Index() {
 		<body>
 			<div class="bg-emerald-100 h-screen">
 				@header()
-				@chatbot()
+				@chatbot(promptName)
 			</div>
 		</body>
 	</html>
@@ -34,7 +34,7 @@ templ header() {
 	</div>
 }
 
-templ chatbot() {
+templ chatbot(promptName string) {
 	<section class="flex flex-col">
 		<div class="md:w-1/2 w-full mx-auto mt-3">
 			<div
@@ -44,7 +44,7 @@ templ chatbot() {
 				<div class="w-full flex">
 					<button
 						class="text-white bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium hover:bg-blue-700 px-4 py-2 rounded-lg text-sm w-fit mx-auto"
-						hx-post="/start-chat"
+						hx-post={ "/start/" + promptName }
 						hx-target="#chat"
 						hx-swap="innerhtml"
 					>

@@ -18,9 +18,10 @@ import (
 )
 
 func main() {
+	promptPath := "./example-prompts.json"
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	// my chat stuff
-	chat, err := services.NewChat("tinyllama", 0.1, 200, logger)
+	chat, err := services.NewChat("tinyllama", 0.1, 200, promptPath, logger)
 	if err != nil {
 		logger.Error(err.Error())
 	}
@@ -61,12 +62,27 @@ func main() {
 			return err
 		})
 	})
-	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		components.Index().Render(r.Context(), w)
+	router.Get("/{promptName}", func(w http.ResponseWriter, r *http.Request) {
+		promptName := chi.URLParam(r, "promptName")
+		if !chat.PromptExists(promptName) {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		components.Index(promptName).Render(r.Context(), w)
 	})
-	router.Post("/start-chat", func(w http.ResponseWriter, r *http.Request) {
-		randomChatId := "randomchat1"
-		components.StartChat(randomChatId).Render(r.Context(), w)
+	router.Post("/start/{promptName}", func(w http.ResponseWriter, r *http.Request) {
+		promptName := chi.URLParam(r, "promptName")
+		if !chat.PromptExists(promptName) {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		id, err := chat.StartChat(promptName)
+		if err != nil {
+			logger.Error(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		components.StartChat(string(id)).Render(r.Context(), w)
 	})
 	logger.Info("Listening and serving on http://localhost:3000")
 	http.ListenAndServe(":3000", router)

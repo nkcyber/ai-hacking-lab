@@ -4,12 +4,16 @@ package services
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"math/rand"
+	"strings"
 
 	"github.com/tmc/langchaingo/schema"
 )
 
 type ChatIdType string
+type Prompts map[string]string
 
 type SerializableMessage struct {
 	Content string                 `json:"content"`
@@ -103,4 +107,33 @@ func (c *ChatService) AddMessage(chatId ChatIdType, message schema.ChatMessage) 
 		return fmt.Errorf("setting key (%s) in redis: %w", chatId, err)
 	}
 	return nil
+}
+
+const charset = "abcdefghijklmnopqrstuvwxyz"
+
+func randomChatId() ChatIdType {
+	chatIdLen := 10
+	sb := strings.Builder{}
+	sb.Grow(chatIdLen)
+	for i := 0; i < chatIdLen; i++ {
+		sb.WriteByte(charset[rand.Intn(len(charset))])
+	}
+	return ChatIdType(sb.String())
+}
+
+// func (c *ChatService) StartChat(prompt string) (ChatIdType, error) {
+
+// }
+
+func (c *ChatService) StartChat(promptName string) (ChatIdType, error) {
+	prompt, ok := c.prompts[promptName]
+	if !ok {
+		return "", errors.New("prompt not found")
+	}
+	id := randomChatId()
+	err := c.AddMessage(id, schema.SystemChatMessage{Content: prompt})
+	if err != nil {
+		return "", err
+	}
+	return id, nil
 }

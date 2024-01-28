@@ -2,8 +2,10 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
+	"os"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -25,10 +27,15 @@ type ChatService struct {
 	chatTTL time.Duration // used when adding keys to redis
 	temp    float64       // passed to LLM options
 	maxLen  int           // max len in tokens - passed to LLM options
+	prompts Prompts
 }
 
 // initalizes ollama & redis
-func NewChat(modelName string, modelTemp float64, maxLen int, log *slog.Logger) (ChatService, error) {
+func NewChat(modelName string, modelTemp float64, maxLen int, promptPath string, log *slog.Logger) (ChatService, error) {
+	prompts, err := loadPrompts(promptPath)
+	if err != nil {
+		return ChatService{}, fmt.Errorf("initalizing prompts: %w", err)
+	}
 	llm, err := ollama.NewChat(ollama.WithLLMOptions(
 		ollama.WithModel(modelName),
 		ollama.WithPredictPenalizeNewline(true),
@@ -51,6 +58,7 @@ func NewChat(modelName string, modelTemp float64, maxLen int, log *slog.Logger) 
 		temp:    modelTemp,
 		log:     log,
 		maxLen:  maxLen,
+		prompts: prompts,
 	}, nil
 }
 
@@ -74,7 +82,24 @@ func (c *ChatService) Respond(chatId ChatIdType, callback func(ctx context.Conte
 	return nil
 }
 
-// TODO: load prompts
+func loadPrompts(promptPath string) (Prompts, error) {
+	plan, err := os.ReadFile(promptPath)
+	if err != nil {
+		return nil, err
+	}
+	var prompts Prompts
+	err = json.Unmarshal(plan, &prompts)
+	if err != nil {
+		return nil, err
+	}
+	return prompts, nil
+}
+
+func (c *ChatService) PromptExists(promptName string) bool {
+	_, ok := c.prompts[promptName]
+	return ok
+}
+
 // TODO: func (c *ChatService) NewChat(prompt PromptId) (ChatId, err)
 // TODO: namespace redis keys: message_ vs prompt_
 
