@@ -30,12 +30,13 @@ type ChatService struct {
 // initalizes ollama & redis
 func NewChat(modelName string, modelTemp float64, maxLen int, log *slog.Logger) (ChatService, error) {
 	llm, err := ollama.NewChat(ollama.WithLLMOptions(
-		ollama.WithModel(modelName), ollama.WithPredictPenalizeNewline(true)))
+		ollama.WithModel(modelName),
+		ollama.WithPredictPenalizeNewline(true),
+	))
 	if err != nil {
 		return ChatService{}, fmt.Errorf("initalizing chat: %w", err)
 	}
 	ctx := context.Background()
-
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "", // no password set

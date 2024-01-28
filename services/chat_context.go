@@ -31,6 +31,18 @@ func (c *ChatService) ClearAllMessages() error {
 	return c.rdb.FlushDB(c.Ctx).Err()
 }
 
+// returns nil if chatId exists. Otherwise, returns an error
+func (c *ChatService) AssertChatIdExists(chatId ChatIdType) error {
+	exists, err := c.rdb.Exists(c.Ctx, string(chatId)).Result()
+	if err != nil {
+		return fmt.Errorf("checking if '%s' exists: %w", chatId, err)
+	}
+	if exists == 0 {
+		return fmt.Errorf("chatId '%s' doesn't exist", chatId)
+	}
+	return nil
+}
+
 // gets our serializable message format from the redis instance
 func (c *ChatService) GetSerialzableMessages(chatId ChatIdType) ([]SerializableMessage, error) {
 	// check if key exists
