@@ -10,6 +10,8 @@ import (
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/httprate"
+	"github.com/nkcyber/ai-hacking-lab/components"
 	"github.com/nkcyber/ai-hacking-lab/services"
 	slogchi "github.com/samber/slog-chi"
 	"github.com/tmc/langchaingo/schema"
@@ -38,6 +40,8 @@ func main() {
 	///
 	router := chi.NewRouter()
 	router.Use(middleware.Timeout(120 * time.Second))
+	router.Use(httprate.LimitByIP(1, 1*time.Second))
+
 	router.Use(slogchi.New(logger))
 	router.Get("/chat/{chatId}", func(w http.ResponseWriter, r *http.Request) {
 		chatId := services.ChatIdType(chi.URLParam(r, "chatId"))
@@ -56,6 +60,9 @@ func main() {
 			_, err := w.Write(chunk)
 			return err
 		})
+	})
+	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		components.Index().Render(r.Context(), w)
 	})
 	logger.Info("Listening and serving on http://localhost:3000")
 	http.ListenAndServe(":3000", router)

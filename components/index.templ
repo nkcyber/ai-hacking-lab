@@ -1,0 +1,44 @@
+package components
+
+templ Index() {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>AI Chat</title>
+			<script src="https://cdn.tailwindcss.com"></script>
+		</head>
+		<body>
+			<div class="bg-emerald-100 h-screen">
+				@header()
+				@chatbot()
+			</div>
+		</body>
+	</html>
+}
+
+templ header() {
+	// contains title text and input for user's security code
+	<div class="bg-gradient-to-r from-emerald-500 to-green-600">
+		<section class="py-5">
+			<div class="container max-w-screen-xl mx-auto px-4">
+				<div class="text-center">
+					<h2 class="text-white font-normal text-gray-900 text-4xl md:text-5xl leading-none">
+						Our New Chatbot
+					</h2>
+				</div>
+			</div>
+		</section>
+	</div>
+}
+
+templ chatbot() {
+	<section class="flex flex-col">
+		<div class="md:w-1/2 w-full mx-auto mt-3">
+			<section class="px-5 py-3 rounded-lg text-black bg-slate-100">
+				this is neat
+			</section>
+		</div>
+	</section>
+}
