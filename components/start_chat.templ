@@ -64,7 +64,7 @@ templ input(chatId string) {
 			name="message"
 			type="text"
 			id="message-content"
-			class="block w-full p-4 text-sm border rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-gray-100 border-gray-300 placeholder-black-400 text-black focus:ring-slate-200 focus:border-slate-200"
+			class="block w-full p-4 text-sm border rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-gray-100 border-gray-300 placeholder-black-400 text-black focus:ring-slate-100 focus:border-slate-100"
 			placeholder="Enter your message"
 			onkeydown="if (event.key === 'Enter') document.getElementById('submit').click()"
 			autofocus
@@ -79,6 +79,7 @@ templ input(chatId string) {
 			hx-disable-element="self"
 			hx-indicator="#spinner"
 			hx-on::after-request={ afterRequest() }
+			hx-on::before-send={ beforeRequest() }
 			class="text-white absolute bg-blue-600 bottom-2.5 end-2.5 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium hover:bg-blue-700 px-4 py-2 rounded-lg text-sm"
 		>
 			Enter
@@ -87,9 +88,14 @@ templ input(chatId string) {
 }
 
 script afterRequest() {
-	// clear input & scroll to bottom of output
-	document.getElementById('message-content').value = '';
+	// scroll to bottom of output
 	document.getElementById('messages').lastChild.scrollIntoView();
+}
+
+script beforeRequest() {
+	// clear input & scroll to bottom of output
+	document.getElementById('spinner').scrollIntoView();
+	document.getElementById('message-content').value = '';
 }
 
 templ indicatorStyle() {
