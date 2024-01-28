@@ -122,11 +122,3 @@ func (c *ChatService) PromptExists(promptName string) bool {
 	_, ok := c.prompts[promptName]
 	return ok
 }
-
-// TODO: func (c *ChatService) NewChat(prompt PromptId) (ChatId, err)
-// TODO: namespace redis keys: message_ vs prompt_
-
-// TODO: figure out return type
-// func (c *ChatService) RespondToUserMessage(string) {
-// }
-// TODO: make chat service after I get message history figured out
