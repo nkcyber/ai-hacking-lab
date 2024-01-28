@@ -8,6 +8,7 @@ templ Index() {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>AI Chat</title>
 			<script src="https://cdn.tailwindcss.com"></script>
+			<script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
 		</head>
 		<body>
 			<div class="bg-emerald-100 h-screen">
@@ -36,49 +37,21 @@ templ header() {
 templ chatbot() {
 	<section class="flex flex-col">
 		<div class="md:w-1/2 w-full mx-auto mt-3">
-			<div class="px-5 py-3 rounded-lg text-black bg-slate-100">
-				@chatHeader()
-				@message()
-				@message()
-				<div>
-					@input()
+			<div
+				class="px-5 py-3 rounded-lg text-black bg-slate-100"
+				id="chat"
+			>
+				<div class="w-full flex">
+					<button
+						class="text-white bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium hover:bg-blue-700 px-4 py-2 rounded-lg text-sm w-fit mx-auto"
+						hx-post="/start-chat"
+						hx-target="#chat"
+						hx-swap="innerhtml"
+					>
+						Start Chatting!
+					</button>
 				</div>
 			</div>
 		</div>
 	</section>
-}
-
-templ chatHeader() {
-	<div class="font-bold text-gray-500 border-b-2 border-gray-400 mb-2">
-		Chat
-	</div>
-}
-
-templ message() {
-	<div class="grid grid-cols-5 gap-3 py-2">
-		<div>
-			Photo
-		</div>
-		<div class="col-span-4">
-			Est nulla ut cupidatat proident adipisicing dolore. Occaecat eiusmod fugiat do est voluptate qui dolore incididunt nostrud. Magna exercitation occaecat est id pariatur velit consequat sint nisi mollit sint amet ex aute.
-		</div>
-	</div>
-}
-
-templ input() {
-	<div class="relative w-full mt-3">
-		<input
-			type="text"
-			id="message"
-			class="block w-full p-4 text-sm border rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-gray-100 border-gray-300 placeholder-black-400 text-black focus:ring-slate-200 focus:border-slate-200"
-			placeholder="Enter your message"
-			autofocus
-		/>
-		<button
-			id="submit"
-			class="text-white absolute bg-blue-600 bottom-2.5 end-2.5 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium hover:bg-blue-700 px-4 py-2 rounded-lg text-sm"
-		>
-			Enter
-		</button>
-	</div>
 }

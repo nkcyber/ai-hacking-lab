@@ -64,6 +64,10 @@ func main() {
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		components.Index().Render(r.Context(), w)
 	})
+	router.Post("/start-chat", func(w http.ResponseWriter, r *http.Request) {
+		randomChatId := "randomchat1"
+		components.StartChat(randomChatId).Render(r.Context(), w)
+	})
 	logger.Info("Listening and serving on http://localhost:3000")
 	http.ListenAndServe(":3000", router)
 }
