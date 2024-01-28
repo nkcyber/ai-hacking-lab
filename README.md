@@ -13,11 +13,37 @@ Learn about AI Hacking!
 
 ## Run locally
 
-1. Install [templ](https://templ.guide/quick-start/installation) and [Go](https://go.dev/doc/install).
+1. Install [templ](https://templ.guide/quick-start/installation), [redis](https://redis.io/docs/install/), [Ollama](https://ollama.ai/download), and [Go](https://go.dev/doc/install).
 2. ```bash
-   templ generate 
-   go run main.go 
+   sudo systemctl start redis # start redis
+   ollama run tinyllama # install model
+   # then...
+   templ generate # if you've made any modifications to .templ files
+   go run main.go
    ```
+
+## Project Overview
+
+This website is meant to serve as a framework for challenging students to manipulate large language models into doing what they want.
+
+> [!NOTE]
+> ```
+> Usage of ./ai-hacking-lab:
+>   -address string
+>         the address to host the server on (default ":3000")
+>   -maxTokens int
+>         the maximum number of tokens in a response. (default 100)
+>   -modelName string
+>         the name of the LLM in the Ollama library (default "tinyllama")
+>   -modelTemperature float
+>         the 'temperature' of the LLM (default 0.1)
+>   -promptPath string
+>         the filepath to load prompts from (default "./example-prompts.json")
+> ```
+> For example,
+> ```bash
+> go run main.go -promptPath='/your/path/here'
+> ```
 
 ### Tech Stack
 

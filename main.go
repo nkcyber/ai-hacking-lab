@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -19,10 +20,17 @@ import (
 )
 
 func main() {
-	promptPath := "./example-prompts.json"
+	// configurable flags
+	promptPath := flag.String("promptPath", "./example-prompts.json", "the filepath to load prompts from")
+	modelName := flag.String("modelName", "tinyllama", "the name of the LLM in the Ollama library")
+	modelTemperature := flag.Float64("modelTemperature", 0.1, "the 'temperature' of the LLM")
+	maxTokens := flag.Int("maxTokens", 100, "the maximum number of tokens in a response.")
+	address := flag.String("address", ":3000", "the address to host the server on")
+	flag.Parse()
+
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	// create chatbot
-	chat, err := services.NewChat("tinyllama", 0.1, 100, promptPath, logger)
+	chat, err := services.NewChat(*modelName, *modelTemperature, *maxTokens, *promptPath, logger)
 	if err != nil {
 		logger.Error(err.Error())
 		return
@@ -35,6 +43,7 @@ func main() {
 	router := chi.NewRouter()
 	router.Use(middleware.Timeout(120 * time.Second))
 	router.Use(slogchi.New(logger))
+	// TODO: shove all of this in a handlers package
 	router.Route("/chat", func(r chi.Router) {
 		r.Use(httprate.Limit(
 			3,             // requests
@@ -100,17 +109,18 @@ func main() {
 			components.StartChat(string(id)).Render(r.Context(), w)
 		})
 	})
-	logger.Info("Listening and serving on http://localhost:3000")
-	http.ListenAndServe(":3000", router)
+	logger.Info(fmt.Sprintf("Listening and serving on %s", *address))
+	http.ListenAndServe(*address, router)
 }
 
+// https://github.com/go-chi/chi/blob/master/_examples/fileserver/main.go
 func FileServer(r chi.Router, path string, root http.FileSystem) {
 	if strings.ContainsAny(path, "{}*") {
 		panic("FileServer does not permit any URL parameters.")
 	}
 
 	if path != "/" && path[len(path)-1] != '/' {
-		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		r.Get(path, http.RedirectHandler(path+"/", http.StatusMovedPermanently).ServeHTTP)
 		path += "/"
 	}
 	path += "*"
