@@ -26,11 +26,12 @@ func main() {
 	modelTemperature := flag.Float64("modelTemperature", 0.1, "the 'temperature' of the LLM")
 	maxTokens := flag.Int("maxTokens", 100, "the maximum number of tokens in a response.")
 	address := flag.String("address", ":3000", "the address to host the server on")
+	redisAddress := flag.String("redisAddress", "localhost:6379", "the address to connect to redis on")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	// create chatbot
-	chat, err := services.NewChat(*modelName, *modelTemperature, *maxTokens, *promptPath, logger)
+	chat, err := services.NewChat(*modelName, *modelTemperature, *maxTokens, *promptPath, *redisAddress, logger)
 	if err != nil {
 		logger.Error(err.Error())
 		return

@@ -32,7 +32,7 @@ type ChatService struct {
 }
 
 // initalizes ollama & redis
-func NewChat(modelName string, modelTemp float64, maxLen int, promptPath string, log *slog.Logger) (ChatService, error) {
+func NewChat(modelName string, modelTemp float64, maxLen int, promptPath, redisAddress string, log *slog.Logger) (ChatService, error) {
 	prompts, err := loadPrompts(promptPath)
 	if err != nil {
 		return ChatService{}, fmt.Errorf("initalizing prompts: %w", err)
@@ -46,7 +46,7 @@ func NewChat(modelName string, modelTemp float64, maxLen int, promptPath string,
 	}
 	ctx := context.Background()
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     redisAddress,
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
