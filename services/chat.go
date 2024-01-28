@@ -11,6 +11,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
+	"github.com/tmc/langchaingo/schema"
 )
 
 type ChatService struct {
@@ -62,7 +63,7 @@ func NewChat(modelName string, modelTemp float64, maxLen int, promptPath string,
 	}, nil
 }
 
-func (c *ChatService) Respond(chatId ChatIdType, callback func(ctx context.Context, chunk []byte) error) error {
+func (c *ChatService) RespondCallback(chatId ChatIdType, callback func(ctx context.Context, chunk []byte) error) error {
 	messageHistory, err := c.GetMessages(chatId)
 	if err != nil {
 		return err
@@ -80,6 +81,25 @@ func (c *ChatService) Respond(chatId ChatIdType, callback func(ctx context.Conte
 		return err
 	}
 	return nil
+}
+
+func (c *ChatService) Respond(chatId ChatIdType) (*schema.AIChatMessage, error) {
+	messageHistory, err := c.GetMessages(chatId)
+	if err != nil {
+		return nil, err
+	}
+	completion, err := c.Llm.Call(c.Ctx, messageHistory,
+		llms.WithTemperature(c.temp),
+		llms.WithMaxTokens(c.maxLen),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("llm response: %w", err)
+	}
+	err = c.AddMessage(chatId, completion)
+	if err != nil {
+		return nil, err
+	}
+	return completion, nil
 }
 
 func loadPrompts(promptPath string) (Prompts, error) {

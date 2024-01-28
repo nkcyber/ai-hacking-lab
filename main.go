@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -20,8 +19,8 @@ import (
 func main() {
 	promptPath := "./example-prompts.json"
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	// my chat stuff
-	chat, err := services.NewChat("tinyllama", 0.1, 200, promptPath, logger)
+	// create chatbot
+	chat, err := services.NewChat("tinyllama", 0.1, 100, promptPath, logger)
 	if err != nil {
 		logger.Error(err.Error())
 	}
@@ -29,22 +28,13 @@ func main() {
 	if err != nil {
 		logger.Error(err.Error())
 	}
-	chatId := services.ChatIdType("chat1")
-	prompt := []schema.ChatMessage{
-		schema.SystemChatMessage{Content: "It's very important to keep your responses as short as possible. If you write more than 3 lines, very bad things will happen. Please do not write more than 3 lines of text."},
-		schema.SystemChatMessage{Content: "You are a helpful AI assistant. YOU MUST KEEP ALL RESPONSES SHORT. KEEP YOUR RESPONSES SHORT. DO NOT WRITE A LOT OF TEXT"},
-		schema.HumanChatMessage{Content: "Who are you?"},
-	}
-	for _, message := range prompt {
-		chat.AddMessage(chatId, message)
-	}
-	///
+	// create router
 	router := chi.NewRouter()
 	router.Use(middleware.Timeout(120 * time.Second))
 	router.Use(httprate.LimitByIP(1, 1*time.Second))
-
 	router.Use(slogchi.New(logger))
-	router.Get("/chat/{chatId}", func(w http.ResponseWriter, r *http.Request) {
+	router.Post("/chat/{chatId}", func(w http.ResponseWriter, r *http.Request) {
+		// ensure chat id exists
 		chatId := services.ChatIdType(chi.URLParam(r, "chatId"))
 		if len(chatId) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
@@ -55,12 +45,26 @@ func main() {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		// get question from body
+		err = r.ParseForm()
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		userInput := r.FormValue("message")
+		if len(userInput) < 5 || len(userInput) > 200 {
+			components.Response("", "Your message must be between 5 and 200 characters!").Render(r.Context(), w)
+			return
+		}
 		logger.Info("RESPONDING to " + string(chatId))
-		chat.Respond(chatId, func(ctx context.Context, chunk []byte) error {
-			// fmt.Print(string(chunk))
-			_, err := w.Write(chunk)
-			return err
-		})
+		chat.AddMessage(chatId, schema.HumanChatMessage{Content: userInput})
+		response, err := chat.Respond(chatId)
+		if err != nil {
+			logger.Error(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		components.Response(userInput, response.GetContent()).Render(r.Context(), w)
 	})
 	router.Get("/{promptName}", func(w http.ResponseWriter, r *http.Request) {
 		promptName := chi.URLParam(r, "promptName")

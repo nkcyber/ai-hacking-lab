@@ -121,10 +121,6 @@ func randomChatId() ChatIdType {
 	return ChatIdType(sb.String())
 }
 
-// func (c *ChatService) StartChat(prompt string) (ChatIdType, error) {
-
-// }
-
 func (c *ChatService) StartChat(promptName string) (ChatIdType, error) {
 	prompt, ok := c.prompts[promptName]
 	if !ok {
