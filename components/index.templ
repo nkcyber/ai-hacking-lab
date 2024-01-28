@@ -14,6 +14,7 @@ templ Index(promptName string) {
 			<div class="bg-emerald-100 h-screen">
 				@header()
 				@chatbot(promptName)
+				@agplNotice()
 			</div>
 		</body>
 	</html>
@@ -54,4 +55,10 @@ templ chatbot(promptName string) {
 			</div>
 		</div>
 	</section>
+}
+
+templ agplNotice() {
+	<div class="sticky top-[100vh] text-slate-400 w-screen text-center  mb-1">
+		This website is <a href="https://github.com/nkcyber/ai-hacking-lab">open source</a> under the AGPL license.
+	</div>
 }

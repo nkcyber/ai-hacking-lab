@@ -29,10 +29,6 @@ func Response(human, ai string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<hr>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		if len(ai) > 0 {
 			templ_7745c5c3_Err = aiMessage(ai).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {

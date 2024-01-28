@@ -5,7 +5,6 @@ templ Response(human, ai string) {
 	if len(human) > 0 {
 		@userMessage(human)
 	}
-	<hr/>
 	if len(ai) > 0 {
 		@aiMessage(ai)
 	}

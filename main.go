@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/middleware"
@@ -32,9 +34,16 @@ func main() {
 	// create router
 	router := chi.NewRouter()
 	router.Use(middleware.Timeout(120 * time.Second))
-	router.Use(httprate.LimitByIP(1, 1*time.Second))
 	router.Use(slogchi.New(logger))
 	router.Route("/chat", func(r chi.Router) {
+		r.Use(httprate.Limit(
+			3,             // requests
+			3*time.Second, // per duration
+			httprate.WithKeyFuncs(httprate.KeyByIP, httprate.KeyByEndpoint),
+		))
+		workDir, _ := os.Getwd()
+		filesDir := http.Dir(filepath.Join(workDir, "assets"))
+		FileServer(r, "/assets", filesDir)
 		r.Post("/{chatId}", func(w http.ResponseWriter, r *http.Request) {
 			// ensure chat id exists
 			chatId := services.ChatIdType(chi.URLParam(r, "chatId"))
@@ -95,38 +104,21 @@ func main() {
 	http.ListenAndServe(":3000", router)
 }
 
-// func main() {
-// 	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
-// 	chat, err := services.NewChat("tinyllama", 0.1, 200, log)
-// 	if err != nil {
-// 		log.Error(err.Error())
-// 	}
-// 	err = chat.ClearAllMessages()
-// 	if err != nil {
-// 		log.Error(err.Error())
-// 	}
-// 	chatId := services.ChatIdType("chat_1")
-// 	prompt := []schema.ChatMessage{
-// 		schema.SystemChatMessage{Content: "It's very important to keep your responses as short as possible. If you write more than 3 lines, very bad things will happen. Please do not write more than 3 lines of text."},
-// 		schema.SystemChatMessage{Content: "You are a helpful AI assistant. YOU MUST KEEP ALL RESPONSES SHORT. KEEP YOUR RESPONSES SHORT. DO NOT WRITE A LOT OF TEXT"},
-// 		schema.HumanChatMessage{Content: "Who are you?"},
-// 	}
-// 	for _, message := range prompt {
-// 		chat.AddMessage(chatId, message)
-// 	}
+func FileServer(r chi.Router, path string, root http.FileSystem) {
+	if strings.ContainsAny(path, "{}*") {
+		panic("FileServer does not permit any URL parameters.")
+	}
 
-// 	history, err := chat.GetMessages(chatId)
-// 	if err != nil {
-// 		log.Error(err.Error())
-// 	} else {
-// 		for i, message := range history {
-// 			log.Info(fmt.Sprintf("message %d: %s", i, message.GetContent()))
-// 		}
-// 	}
-// 	log.Info("RESPONDING...")
-// 	chat.Respond(chatId, func(ctx context.Context, chunk []byte) error {
-// 		fmt.Print(string(chunk))
-// 		return nil
-// 	})
+	if path != "/" && path[len(path)-1] != '/' {
+		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		path += "/"
+	}
+	path += "*"
 
-// }
+	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
+		rctx := chi.RouteContext(r.Context())
+		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
+		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
+		fs.ServeHTTP(w, r)
+	})
+}
