@@ -1,6 +1,6 @@
 module github.com/nkcyber/ai-hacking-lab
 
-go 1.21.6
+go 1.21
 
 require (
 	github.com/redis/go-redis/v9 v9.4.0
