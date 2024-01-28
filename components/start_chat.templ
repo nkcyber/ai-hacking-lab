@@ -4,9 +4,8 @@ package components
 
 templ StartChat(chatId string) {
 	@chatHeader()
-	<div id="messages">
-		@message()
-		@message()
+	<div id="messages" class="overflow-y-auto max-h-[50vh]">
+		@aiMessage("Hi! I'm your AI assistant, and I'm here to help!")
 	</div>
 	<div>
 		@input(chatId)
@@ -19,13 +18,30 @@ templ chatHeader() {
 	</div>
 }
 
-templ message() {
+templ userMessage(message string) {
 	<div class="grid grid-cols-5 gap-3 py-2">
 		<div>
-			Photo
+			// SVG of person from heroicons.com
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+			</svg>
 		</div>
 		<div class="col-span-4">
-			Est nulla ut cupidatat proident adipisicing dolore. Occaecat eiusmod fugiat do est voluptate qui dolore incididunt nostrud. Magna exercitation occaecat est id pariatur velit consequat sint nisi mollit sint amet ex aute.
+			{ message }
+		</div>
+	</div>
+}
+
+templ aiMessage(message string) {
+	<div class="grid grid-cols-5 gap-3 py-2">
+		<div>
+			// SVG of CPU chip from heroicons.com
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z"></path>
+			</svg>
+		</div>
+		<div class="col-span-4">
+			{ message }
 		</div>
 	</div>
 }
@@ -51,9 +67,16 @@ templ input(chatId string) {
 			hx-swap="beforeend"
 			hx-ext="disable-element"
 			hx-disable-element="self"
+			hx-on::after-request={ afterRequest() }
 			class="text-white absolute bg-blue-600 bottom-2.5 end-2.5 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium hover:bg-blue-700 px-4 py-2 rounded-lg text-sm"
 		>
 			Enter
 		</button>
 	</div>
+}
+
+script afterRequest() {
+	// clear input & scroll to bottom of output
+	document.getElementById('message-content').value = '';
+	document.getElementById('messages').lastChild.scrollIntoView()
 }

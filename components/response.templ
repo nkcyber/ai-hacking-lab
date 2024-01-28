@@ -3,24 +3,10 @@ package components
 templ Response(human, ai string) {
 	//  Human Response:
 	if len(human) > 0 {
-		<div class="grid grid-cols-5 gap-3 py-2">
-			<div>
-				Photo
-			</div>
-			<div class="col-span-4">
-				{ human }
-			</div>
-		</div>
+		@userMessage(human)
 	}
 	<hr/>
 	if len(ai) > 0 {
-		<div class="grid grid-cols-5 gap-3 py-2">
-			<div>
-				Photo
-			</div>
-			<div class="col-span-4">
-				{ ai }
-			</div>
-		</div>
+		@aiMessage(ai)
 	}
 }
