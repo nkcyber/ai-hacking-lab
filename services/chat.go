@@ -58,7 +58,7 @@ func NewChat(modelName string, modelTemp float64, maxLen int, promptPath, redisA
 		ctx:     ctx,
 		llm:     llm,
 		rdb:     rdb,
-		chatTTL: 10 * time.Minute,
+		chatTTL: 30 * time.Minute,
 		temp:    modelTemp,
 		log:     log,
 		maxLen:  maxLen,
