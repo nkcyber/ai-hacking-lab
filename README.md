@@ -20,7 +20,9 @@ Learn about AI Hacking!
 
 ## Project Overview
 
-This website is meant to serve as a framework for challenging students to manipulate large language models into doing what they want.
+This website is meant to serve as a simple framework for challenging students to manipulate large language models into doing what they want.
+
+Administrators can give the model prompts with CTF flags, and challenge students to get the flags from the model. See [`./example-prompts.json`](./example-prompts.json) for example prompts. The URL determines prompt selection with `/chat/{promptName}`.
 
 > [!NOTE]
 > ```
