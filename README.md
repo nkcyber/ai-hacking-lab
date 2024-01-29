@@ -27,18 +27,21 @@ Administrators can provide prompts with CTF flags and challenge students to get 
 > [!NOTE]
 > ```
 > Usage of ./ai-hacking-lab:
->   -address string
+>     -address string
 >         the address to host the server on (default ":3000")
->   -maxTokens int
->         the maximum number of tokens in a response. (default 100)
->   -modelName string
->         the name of the LLM in the Ollama library (default "tinyllama")
->   -modelTemperature float
->         the 'temperature' of the LLM (default 0.1)
->   -promptPath string
->         the filepath to load prompts from (default "./example-prompts.json")
->   -redisAddress string
->         the address to connect to redis on (default "localhost:6379")
+>     -maxTokens int
+>           the maximum number of tokens in a response. (default 100)
+>     -modelName string
+>           the name of the LLM in the Ollama library (default "tinyllama")
+>     -modelTemperature float
+>           the 'temperature' of the LLM (default 0.1)
+>     -redisAddress string
+>           the address to connect to redis on; must not include protocol (default "localhost:6379")
+>     -ollamaAddress string
+>           the address to connect to ollama on; must include protocol (default "http://localhost:11434")
+>     -promptPath string
+>           the filepath to load prompts from (default "./example-prompts.json")
+>   
 > ```
 > For example,
 > ```bash

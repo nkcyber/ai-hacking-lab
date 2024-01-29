@@ -32,7 +32,7 @@ type ChatService struct {
 }
 
 // initalizes ollama & redis
-func NewChat(modelName string, modelTemp float64, maxLen int, promptPath, redisAddress string, log *slog.Logger) (ChatService, error) {
+func NewChat(modelName string, modelTemp float64, maxLen int, promptPath, redisAddress, ollamaAddress string, log *slog.Logger) (ChatService, error) {
 	prompts, err := loadPrompts(promptPath)
 	if err != nil {
 		return ChatService{}, fmt.Errorf("initalizing prompts: %w", err)
@@ -40,6 +40,7 @@ func NewChat(modelName string, modelTemp float64, maxLen int, promptPath, redisA
 	llm, err := ollama.NewChat(ollama.WithLLMOptions(
 		ollama.WithModel(modelName),
 		ollama.WithPredictPenalizeNewline(true),
+		ollama.WithServerURL(ollamaAddress),
 	))
 	if err != nil {
 		return ChatService{}, fmt.Errorf("initalizing chat: %w", err)

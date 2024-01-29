@@ -26,12 +26,13 @@ func main() {
 	modelTemperature := flag.Float64("modelTemperature", 0.1, "the 'temperature' of the LLM")
 	maxTokens := flag.Int("maxTokens", 100, "the maximum number of tokens in a response.")
 	address := flag.String("address", ":3000", "the address to host the server on")
-	redisAddress := flag.String("redisAddress", "localhost:6379", "the address to connect to redis on")
+	redisAddress := flag.String("redisAddress", "localhost:6379", "the address to connect to redis on; must not include protocol")
+	ollamaAddress := flag.String("ollamaAddress", "http://localhost:11434", "the address to connect to ollama on; must include protocol")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	// create chatbot
-	chat, err := services.NewChat(*modelName, *modelTemperature, *maxTokens, *promptPath, *redisAddress, logger)
+	chat, err := services.NewChat(*modelName, *modelTemperature, *maxTokens, *promptPath, *redisAddress, *ollamaAddress, logger)
 	if err != nil {
 		logger.Error(err.Error())
 		return
