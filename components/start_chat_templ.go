@@ -202,7 +202,7 @@ func input(chatId string) templ.Component {
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"relative w-full mt-3\"><input name=\"message\" type=\"text\" id=\"message-content\" class=\"block w-full p-4 text-sm border rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-gray-100 border-gray-300 placeholder-black-400 text-black focus:ring-slate-100 focus:border-slate-100\" placeholder=\"Enter your message\" onkeydown=\"if (event.key === &#39;Enter&#39;) document.getElementById(&#39;submit&#39;).click()\" autofocus> ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"relative w-full mt-3\"><input name=\"message\" type=\"text\" id=\"message-content\" class=\"block w-full p-4 pr-20 text-sm border rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-gray-100 border-gray-300 placeholder-black-400 text-black focus:ring-slate-100 focus:border-slate-100\" placeholder=\"Enter your message\" onkeydown=\"if (event.key === &#39;Enter&#39;) document.getElementById(&#39;submit&#39;).click()\" autofocus> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
